@@ -13,18 +13,16 @@
  * - Profit?
  * */
 
+import launchpad.LaunchpadInstance;
 import midi.MidiDeviceInformer;
-import midi.MidiDeviceManager;
 import midi.MidiDeviceWrapper;
 
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiMessage;
-import javax.sound.midi.Receiver;
+import javax.sound.midi.*;
 import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         MidiDevice[] devices = MidiDeviceInformer.getDevices();
         System.out.println("Select device: ");
 
@@ -34,16 +32,26 @@ public class Main {
         }
 
         System.out.println("-- -- -- -- -- -- -- -- -- --");
-        System.out.println("Select device number: \n");
+        System.out.println("Select device number (in/out & in/out): \n");
 
         Scanner scanner = new Scanner(System.in);
-        int value = scanner.nextInt();
-        scanner.close();
+        int in1 = scanner.nextInt();
+        int out1 = scanner.nextInt();
 
-        MidiDeviceWrapper deviceWrapper = MidiDeviceManager.instance.OpenDevice(devices[value].getDeviceInfo());
-        System.out.println(deviceWrapper);
+        int in2 = scanner.nextInt();
+        int out2 = scanner.nextInt();
 
-        deviceWrapper.getMidiTransmitter().setReceiver(new Receiver() {
+
+        MidiDeviceWrapper device1 = new MidiDeviceWrapper(devices[in1], devices[out1]);
+        MidiDeviceWrapper device2 = new MidiDeviceWrapper(devices[in2], devices[out2]);
+
+        devices[in1].open();
+        devices[in2].open();
+        devices[out1].open();
+        devices[out2].open();
+
+        LaunchpadInstance launchpadInstance = new LaunchpadInstance(device1, device2);
+        device2.getMidiTransmitter().setReceiver(new Receiver() {
             @Override
             public void send(MidiMessage message, long timeStamp) {
                 System.out.println(Arrays.toString(message.getMessage()));
@@ -53,5 +61,16 @@ public class Main {
             public void close() {
             }
         });
+
+        // Test
+        while (true) {
+            if (scanner.nextInt() > 5) {
+                launchpadInstance.enterDAWMode();
+            } else {
+                launchpadInstance.exitDawMode();
+            }
+
+            Thread.sleep(2);
+        }
     }
 }

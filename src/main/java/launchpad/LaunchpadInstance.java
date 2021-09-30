@@ -11,12 +11,11 @@ public class LaunchpadInstance extends LaunchpadBase {
     private MidiDeviceWrapper[] devices = new MidiDeviceWrapper[2];
 
     /**
-     *
-     * @param sessionDevice Device used to control session, and messages. Usually the first one on the list
-     * @param midiDevice Device on which launchpad sends raw midi key presses. EX: on drums view
+     * @param dataInterfaceDevice Device used to control session, and messages. Usually the first one on the list
+     * @param midiDevice    Device on which launchpad sends raw midi key presses. EX: on drums view
      */
-    public LaunchpadInstance(MidiDeviceWrapper sessionDevice, MidiDeviceWrapper midiDevice) throws Exception {
-        this.devices[0] = sessionDevice;
+    public LaunchpadInstance(MidiDeviceWrapper dataInterfaceDevice, MidiDeviceWrapper midiDevice) throws Exception {
+        this.devices[0] = dataInterfaceDevice;
         this.devices[1] = midiDevice;
 
         for (MidiDeviceWrapper device : this.devices) {
@@ -40,9 +39,29 @@ public class LaunchpadInstance extends LaunchpadBase {
         System.out.println("Launchpad entered DAW mode");
     }
 
+    public void enterProgrammerMode() {
+        this.sendControllMessage(new byte[]{(byte) 0xf0, 0x00, 0x20, 0x29, 0x02, 0x0d, 0x0E, 0x1, (byte) 0xf7});
+        System.out.println("Launchpad entered DAW mode");
+    }
+
+    public void changeMode(byte layout) {
+        this.sendControllMessage(new byte[]{(byte) 0xF0, 0x00, 0x20, 0x29, 0x02, 0x0D, 0x00, layout, (byte) 0xF7});
+        System.out.println("Changed layout to " + layout);
+    }
+
     public void exitDawMode() {
         this.sendControllMessage(new byte[]{(byte) 0xf0, 0x00, 0x20, 0x29, 0x02, 0x0d, 0x10, 0x0, (byte) 0xf7});
         System.out.println("Launchpad exited DAW mode");
+    }
+
+    public void testColorChange() {
+        this.sendControllMessage(new byte[]{(byte) 0x91, (byte) 0x0B, (byte) 0x05});
+        System.out.println("Test color change");
+    }
+
+    public void testColorChangeOff() {
+        this.sendControllMessage(new byte[]{(byte) 0x80, (byte) 0x0B, (byte) 0x05});
+        System.out.println("Test color change");
     }
 
     private void sendControllMessage(byte[] data) {

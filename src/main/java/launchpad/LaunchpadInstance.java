@@ -198,7 +198,6 @@ public class LaunchpadInstance {
 
     // TODO: This method ONLY works in programmers or DAW mode...
     public int[] byteToPosition(byte value) {
-        System.out.println(value);
         int[] res = new int[2];
         res[1] = (int) (value / 10.0f); // Y
         res[0] = (int) ((((value / 10.0f) - res[1]) + 0.05) * 10); // X
